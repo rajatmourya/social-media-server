@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const router = require("./routers/index");
 const morgan = require("morgan");
+const cookieParser = require('cookie-parser');
 
 // Load environment variables from.env file
 dotenv.config("./.env");
@@ -13,6 +14,7 @@ const app = express();
 //middlewares
 app.use(express.json());
 app.use(morgan('common'));
+app.use(cookieParser());
 
 app.use('/api', router)
 app.get("/", (req, res) => {

@@ -59,7 +59,12 @@ const loginController = async (req, res) => {
       id: user._id,
     });
 
-    return res.json({ accessToken, refreshToken });
+    res.cookie('jwt', refreshToken, {
+      httpOnly: true,
+      secure: true
+    });
+
+    return res.json({ accessToken });
   } catch (error) {
     console.error(error);
   }
@@ -67,24 +72,27 @@ const loginController = async (req, res) => {
 
 // this api aill check the refreshToken validity and genrate a new access token
 const refreshAccessTokenController = async (req, res) => {
-  console.log("hello");
-  const { refreshToken } = req.body;
-
-  if(!refreshToken) {
-    return res.status(401).send("refresh token required"); 
+  // const { refreshToken } = req.body;
+  const cookies = req.cookies;
+  if(!req.cookies.jwt){
+    return res.status(401).send("Refresh token in cookies is required"); 
   }
+
+  const refreshToken = cookies.jwt;
+
+  // if (!refreshToken) {
+  //   return res.status(401).send("refresh token required");
+  // }
 
   try {
     const decoded = jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_PRIVATE_KEY
     );
-    
+
     if (!decoded) {
       return res.status(403).send("Invalid refresh key");
     }
-
-    console.log(`hello-------------------------------------${decoded}`);
 
     const _id = decoded._id;
     const accessToken = generateAccessToken({ _id });
